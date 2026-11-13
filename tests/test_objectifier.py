@@ -2,7 +2,7 @@ import unittest
 import datetime
 import base64
 
-from protoplasm.casting import objectifier
+from protoplasm6.casting import objectifier
 import os
 import sys
 

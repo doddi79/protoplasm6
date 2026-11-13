@@ -1,8 +1,8 @@
 import unittest
 import datetime
 import base64
-import protoplasm.casting
-from protoplasm.casting import castutils
+import protoplasm6.casting
+from protoplasm6.casting import castutils
 import os
 import sys
 import shutil
@@ -78,46 +78,46 @@ class CastutilsTest(unittest.TestCase):
         p1.foo = 'Foo!'
         p1.bar = 'Bar!!!'
 
-        self.assertEqual(p1, protoplasm.casting.mkproto(rainbow_pb2.SubMessage, foo='Foo!', bar='Bar!!!'))
+        self.assertEqual(p1, protoplasm6.casting.mkproto(rainbow_pb2.SubMessage, foo='Foo!', bar='Bar!!!'))
 
         p2 = rainbow_pb2.SubMessage()
         p2.foo = 'Foo Two!'
-        self.assertEqual(p2, protoplasm.casting.mkproto(rainbow_pb2.SubMessage, foo='Foo Two!'))
+        self.assertEqual(p2, protoplasm6.casting.mkproto(rainbow_pb2.SubMessage, foo='Foo Two!'))
 
         p3 = rainbow_pb2.SubMessage()
         p3.foo = 'Not Foo!'
-        self.assertNotEqual(p3, protoplasm.casting.mkproto(rainbow_pb2.SubMessage, foo='Foo You!'))
+        self.assertNotEqual(p3, protoplasm6.casting.mkproto(rainbow_pb2.SubMessage, foo='Foo You!'))
 
         p4 = rainbow_pb2.SubMessage()
-        self.assertEqual(p4, protoplasm.casting.mkproto(rainbow_pb2.SubMessage))
+        self.assertEqual(p4, protoplasm6.casting.mkproto(rainbow_pb2.SubMessage))
 
     def test_nested_mkproto(self):
         from sandbox.test import rainbow_pb2
 
         p1 = rainbow_pb2.RainbowMessage()
-        self.assertEqual(p1, protoplasm.casting.mkproto(rainbow_pb2.RainbowMessage))
+        self.assertEqual(p1, protoplasm6.casting.mkproto(rainbow_pb2.RainbowMessage))
 
         p2 = rainbow_pb2.RainbowMessage()
         p2.simple_field = 'Green'
-        self.assertEqual(p2, protoplasm.casting.mkproto(rainbow_pb2.RainbowMessage, simple_field='Green'))
-        self.assertNotEqual(p1, protoplasm.casting.mkproto(rainbow_pb2.RainbowMessage, simple_field='Green'))
+        self.assertEqual(p2, protoplasm6.casting.mkproto(rainbow_pb2.RainbowMessage, simple_field='Green'))
+        self.assertNotEqual(p1, protoplasm6.casting.mkproto(rainbow_pb2.RainbowMessage, simple_field='Green'))
 
         p3 = rainbow_pb2.RainbowMessage()
         p3.simple_field = 'Green'
         p3.message_field.foo = 'Blue'
-        self.assertEqual(p3, protoplasm.casting.mkproto(rainbow_pb2.RainbowMessage,
+        self.assertEqual(p3, protoplasm6.casting.mkproto(rainbow_pb2.RainbowMessage,
                                                         simple_field='Green',
                                                         message_field__foo='Blue'))
         p4 = rainbow_pb2.RainbowMessage()
         p4.simple_field = 'Green'
         p4.message_field.foo = 'Blue'
         p4.message_field.bar = 'Yellow'
-        self.assertEqual(p4, protoplasm.casting.mkproto(rainbow_pb2.RainbowMessage,
+        self.assertEqual(p4, protoplasm6.casting.mkproto(rainbow_pb2.RainbowMessage,
                                                         simple_field='Green',
                                                         message_field__foo='Blue',
                                                         message_field__bar='Yellow'))
         self.assertNotEqual(p3, p4)
-        self.assertNotEqual(p4, protoplasm.casting.mkproto(rainbow_pb2.RainbowMessage,
+        self.assertNotEqual(p4, protoplasm6.casting.mkproto(rainbow_pb2.RainbowMessage,
                                                            simple_field='Green',
                                                            message_field__foo='Blue',
                                                            message_field__bar='Red'))
@@ -129,7 +129,7 @@ class CastutilsTest(unittest.TestCase):
         p5.simple_list.append('Four')
         p5.simple_list.append('Seven')
         p5.simple_list.append('99')
-        self.assertEqual(p5, protoplasm.casting.mkproto(rainbow_pb2.RainbowMessage,
+        self.assertEqual(p5, protoplasm6.casting.mkproto(rainbow_pb2.RainbowMessage,
                                                         simple_field='Green',
                                                         message_field__foo='Blue',
                                                         message_field__bar='Yellow',
@@ -142,7 +142,7 @@ class CastutilsTest(unittest.TestCase):
         p6.simple_list.append('Four')
         p6.simple_list.append('Seven')
         p6.simple_list.append('98')
-        self.assertNotEqual(p6, protoplasm.casting.mkproto(rainbow_pb2.RainbowMessage,
+        self.assertNotEqual(p6, protoplasm6.casting.mkproto(rainbow_pb2.RainbowMessage,
                                                            simple_field='Green',
                                                            message_field__foo='Blue',
                                                            message_field__bar='Yellow',
@@ -161,7 +161,7 @@ class CastutilsTest(unittest.TestCase):
         m2 = p7.message_list.add()
         m2.foo = 'a Fool in a list'
         m2.bar = 'Tequila bar'
-        self.assertEqual(p7, protoplasm.casting.mkproto(rainbow_pb2.RainbowMessage,
+        self.assertEqual(p7, protoplasm6.casting.mkproto(rainbow_pb2.RainbowMessage,
                                                         simple_field='Green',
                                                         message_field__foo='Blue',
                                                         message_field__bar='Yellow',
@@ -171,7 +171,7 @@ class CastutilsTest(unittest.TestCase):
                                                              castutils.kwdict(foo='a Fool in a list',
                                                                               bar='Tequila bar')]))
 
-        self.assertNotEqual(p7, protoplasm.casting.mkproto(rainbow_pb2.RainbowMessage,
+        self.assertNotEqual(p7, protoplasm6.casting.mkproto(rainbow_pb2.RainbowMessage,
                                                            simple_field='Green',
                                                            message_field__foo='Blue',
                                                            message_field__bar='Yellow',
@@ -194,7 +194,7 @@ class CastutilsTest(unittest.TestCase):
         m4.bar = 'Tequila bar'
         p8.simple_map['dora'] = 'Imamap!'
         p8.simple_map['diego'] = 'Camera!'
-        self.assertEqual(p8, protoplasm.casting.mkproto(rainbow_pb2.RainbowMessage,
+        self.assertEqual(p8, protoplasm6.casting.mkproto(rainbow_pb2.RainbowMessage,
                                                         simple_field='Green',
                                                         message_field__foo='Blue',
                                                         message_field__bar='Yellow',
@@ -224,7 +224,7 @@ class CastutilsTest(unittest.TestCase):
         p9.message_map['donald'].foo = 'duck'
         p9.message_map['donald'].bar = 'trump'
         p9.message_map['mickey'].foo = 'mouse'
-        self.assertEqual(p9, protoplasm.casting.mkproto(rainbow_pb2.RainbowMessage,
+        self.assertEqual(p9, protoplasm6.casting.mkproto(rainbow_pb2.RainbowMessage,
                                                         simple_field='Green',
                                                         message_field__foo='Blue',
                                                         message_field__bar='Yellow',
@@ -258,7 +258,7 @@ class CastutilsTest(unittest.TestCase):
         p10.message_map['donald'].foo = 'duck'
         p10.message_map['donald'].bar = 'trump'
 
-        self.assertEqual(p10, protoplasm.casting.mkproto(rainbow_pb2.RainbowMessage,
+        self.assertEqual(p10, protoplasm6.casting.mkproto(rainbow_pb2.RainbowMessage,
                                                          simple_map__diego='Camera!',
                                                          simple_field='Green',
                                                          message_field__foo='Blue',
@@ -280,37 +280,37 @@ class CastutilsTest(unittest.TestCase):
         dc1.foo = 'Foo!'
         dc1.bar = 'Bar!!!'
 
-        self.assertEqual(dc1, protoplasm.casting.mkdataclass(rainbow_dc.SubMessage, foo='Foo!', bar='Bar!!!'))
+        self.assertEqual(dc1, protoplasm6.casting.mkdataclass(rainbow_dc.SubMessage, foo='Foo!', bar='Bar!!!'))
 
         dc2 = rainbow_dc.SubMessage()
         dc2.foo = 'Foo Two!'
-        self.assertEqual(dc2, protoplasm.casting.mkdataclass(rainbow_dc.SubMessage, foo='Foo Two!'))
+        self.assertEqual(dc2, protoplasm6.casting.mkdataclass(rainbow_dc.SubMessage, foo='Foo Two!'))
 
         dc3 = rainbow_dc.SubMessage()
         dc3.foo = 'Not Foo!'
-        self.assertNotEqual(dc3, protoplasm.casting.mkdataclass(rainbow_dc.SubMessage, foo='Foo You!'))
+        self.assertNotEqual(dc3, protoplasm6.casting.mkdataclass(rainbow_dc.SubMessage, foo='Foo You!'))
 
         dc4 = rainbow_dc.SubMessage()
-        self.assertEqual(dc4, protoplasm.casting.mkdataclass(rainbow_dc.SubMessage))
+        self.assertEqual(dc4, protoplasm6.casting.mkdataclass(rainbow_dc.SubMessage))
 
     def test_nested_mkdataclass(self):
         from sandbox.test import rainbow_dc
 
         dc1 = rainbow_dc.RainbowMessage()
-        self.assertEqual(dc1, protoplasm.casting.mkdataclass(rainbow_dc.RainbowMessage))
+        self.assertEqual(dc1, protoplasm6.casting.mkdataclass(rainbow_dc.RainbowMessage))
 
         dc2 = rainbow_dc.RainbowMessage()
         dc2.simple_field = 'Green'
-        self.assertEqual(dc2, protoplasm.casting.mkdataclass(rainbow_dc.RainbowMessage, simple_field='Green'))
+        self.assertEqual(dc2, protoplasm6.casting.mkdataclass(rainbow_dc.RainbowMessage, simple_field='Green'))
         self.assertNotEqual(dc1,
-                            protoplasm.casting.mkdataclass(rainbow_dc.RainbowMessage, simple_field='Green'))
+                            protoplasm6.casting.mkdataclass(rainbow_dc.RainbowMessage, simple_field='Green'))
 
         dc3 = rainbow_dc.RainbowMessage()
         dc3.simple_field = 'Green'
         dc3.message_field = rainbow_dc.SubMessage()
         dc3.message_field.foo = 'Blue'
 
-        expected_dc3 = protoplasm.casting.mkdataclass(rainbow_dc.RainbowMessage,
+        expected_dc3 = protoplasm6.casting.mkdataclass(rainbow_dc.RainbowMessage,
                                                       simple_field='Green',
                                                       message_field__foo='Blue')
 
@@ -321,12 +321,12 @@ class CastutilsTest(unittest.TestCase):
         dc4.message_field = rainbow_dc.SubMessage()
         dc4.message_field.foo = 'Blue'
         dc4.message_field.bar = 'Yellow'
-        self.assertEqual(dc4, protoplasm.casting.mkdataclass(rainbow_dc.RainbowMessage,
+        self.assertEqual(dc4, protoplasm6.casting.mkdataclass(rainbow_dc.RainbowMessage,
                                                              simple_field='Green',
                                                              message_field__foo='Blue',
                                                              message_field__bar='Yellow'))
         self.assertNotEqual(dc3, dc4)
-        self.assertNotEqual(dc4, protoplasm.casting.mkdataclass(rainbow_dc.RainbowMessage,
+        self.assertNotEqual(dc4, protoplasm6.casting.mkdataclass(rainbow_dc.RainbowMessage,
                                                                 simple_field='Green',
                                                                 message_field__foo='Blue',
                                                                 message_field__bar='Red'))
@@ -337,7 +337,7 @@ class CastutilsTest(unittest.TestCase):
         dc5.simple_list.append('Four')
         dc5.simple_list.append('Seven')
         dc5.simple_list.append('99')
-        self.assertEqual(dc5, protoplasm.casting.mkdataclass(rainbow_dc.RainbowMessage,
+        self.assertEqual(dc5, protoplasm6.casting.mkdataclass(rainbow_dc.RainbowMessage,
                                                              simple_field='Green',
                                                              message_field__foo='Blue',
                                                              message_field__bar='Yellow',
@@ -349,7 +349,7 @@ class CastutilsTest(unittest.TestCase):
         dc6.simple_list.append('Four')
         dc6.simple_list.append('Seven')
         dc6.simple_list.append('98')
-        self.assertNotEqual(dc6, protoplasm.casting.mkdataclass(rainbow_dc.RainbowMessage,
+        self.assertNotEqual(dc6, protoplasm6.casting.mkdataclass(rainbow_dc.RainbowMessage,
                                                                 simple_field='Green',
                                                                 message_field__foo='Blue',
                                                                 message_field__bar='Yellow',
@@ -365,7 +365,7 @@ class CastutilsTest(unittest.TestCase):
         dc7.message_list.append(rainbow_dc.SubMessage(foo='Foo in a list', bar='Candybar'))
         dc7.message_list.append(rainbow_dc.SubMessage(foo='a Fool in a list', bar='Tequila bar'))
 
-        self.assertEqual(dc7, protoplasm.casting.mkdataclass(rainbow_dc.RainbowMessage,
+        self.assertEqual(dc7, protoplasm6.casting.mkdataclass(rainbow_dc.RainbowMessage,
                                                              simple_field='Green',
                                                              message_field__foo='Blue',
                                                              message_field__bar='Yellow',
@@ -375,7 +375,7 @@ class CastutilsTest(unittest.TestCase):
                                                                            castutils.kwdict(foo='a Fool in a list',
                                                                                             bar='Tequila bar')]))
 
-        self.assertNotEqual(dc7, protoplasm.casting.mkdataclass(rainbow_dc.RainbowMessage,
+        self.assertNotEqual(dc7, protoplasm6.casting.mkdataclass(rainbow_dc.RainbowMessage,
                                                                 simple_field='Green',
                                                                 message_field__foo='Blue',
                                                                 message_field__bar='Yellow',
@@ -395,7 +395,7 @@ class CastutilsTest(unittest.TestCase):
 
         dc8.simple_map['dora'] = 'Imamap!'
         dc8.simple_map['diego'] = 'Camera!'
-        self.assertEqual(dc8, protoplasm.casting.mkdataclass(rainbow_dc.RainbowMessage,
+        self.assertEqual(dc8, protoplasm6.casting.mkdataclass(rainbow_dc.RainbowMessage,
                                                              simple_field='Green',
                                                              message_field__foo='Blue',
                                                              message_field__bar='Yellow',
@@ -423,7 +423,7 @@ class CastutilsTest(unittest.TestCase):
 
         dc9.message_map['mickey'] = rainbow_dc.SubMessage(foo='mouse')
 
-        expected_dc9 = protoplasm.casting.mkdataclass(rainbow_dc.RainbowMessage,
+        expected_dc9 = protoplasm6.casting.mkdataclass(rainbow_dc.RainbowMessage,
                                                       simple_field='Green',
                                                       message_field__foo='Blue',
                                                       message_field__bar='Yellow',
@@ -455,7 +455,7 @@ class CastutilsTest(unittest.TestCase):
         dc10.message_map['mickey'] = rainbow_dc.SubMessage(foo='mouse')
         dc10.message_map['donald'] = rainbow_dc.SubMessage(foo='duck', bar='trump')
 
-        self.assertEqual(dc10, protoplasm.casting.mkdataclass(rainbow_dc.RainbowMessage,
+        self.assertEqual(dc10, protoplasm6.casting.mkdataclass(rainbow_dc.RainbowMessage,
                                                               simple_map__diego='Camera!',
                                                               simple_field='Green',
                                                               message_field__foo='Blue',
@@ -513,7 +513,7 @@ class CastutilsTest(unittest.TestCase):
         p_expect.my_timestamp_map['noon'].FromJsonString(ts4)
         p_expect.my_timestamp_map['midnight'].FromJsonString(ts5)
 
-        self.assertEqual(p_expect, protoplasm.casting.mkproto(rainbow_pb2.TimestampMessage, my_timestamp=ts1,
+        self.assertEqual(p_expect, protoplasm6.casting.mkproto(rainbow_pb2.TimestampMessage, my_timestamp=ts1,
                                                                                             my_timestamp_list=[ts2, ts3],
                                                                                             my_timestamp_map__noon=ts4,
                                                                                             my_timestamp_map__midnight=ts5))
@@ -548,7 +548,7 @@ class CastutilsTest(unittest.TestCase):
         dc_expect.my_timestamp_map['noon'] = dt4
         dc_expect.my_timestamp_map['midnight'] = dt5
 
-        self.assertEqual(dc_expect, protoplasm.casting.mkdataclass(rainbow_dc.TimestampMessage,
+        self.assertEqual(dc_expect, protoplasm6.casting.mkdataclass(rainbow_dc.TimestampMessage,
                                                                    my_timestamp=dt1,
                                                                    my_timestamp_list=[dt2, dt3],
                                                                    my_timestamp_map__noon=dt4,
@@ -584,7 +584,7 @@ class CastutilsTest(unittest.TestCase):
         p_expect.my_bytes_map['zero'] = as_bytes_4
         p_expect.my_bytes_map['one'] = as_bytes_5
 
-        self.assertEqual(p_expect, protoplasm.casting.mkproto(rainbow_pb2.BytesMessage,
+        self.assertEqual(p_expect, protoplasm6.casting.mkproto(rainbow_pb2.BytesMessage,
                                                               my_bytes=as_base64_1,
                                                               my_bytes_list=[as_base64_2, as_base64_3],
                                                               my_bytes_map__zero=as_base64_4,
@@ -620,7 +620,7 @@ class CastutilsTest(unittest.TestCase):
         dc_expect.my_bytes_map['zero'] = as_bytes_4
         dc_expect.my_bytes_map['one'] = as_bytes_5
 
-        self.assertEqual(dc_expect, protoplasm.casting.mkdataclass(rainbow_dc.BytesMessage,
+        self.assertEqual(dc_expect, protoplasm6.casting.mkdataclass(rainbow_dc.BytesMessage,
                                                                    my_bytes=as_bytes_1,
                                                                    my_bytes_list=[as_bytes_2, as_base64_3],
                                                                    my_bytes_map__zero=as_bytes_4,
@@ -648,7 +648,7 @@ class CastutilsTest(unittest.TestCase):
         p_expect.my_alias_enum_map['sex'] = enums_pb2.SEX
         p_expect.my_alias_enum_map['fimm'] = enums_pb2.FIVE
 
-        self.assertEqual(p_expect, protoplasm.casting.mkproto(enums_pb2.WithExternalEnum,
+        self.assertEqual(p_expect, protoplasm6.casting.mkproto(enums_pb2.WithExternalEnum,
                                                               my_enum=2,
                                                               my_alias_enum=3,
                                                               my_enum_list=[1, 3],
@@ -658,7 +658,7 @@ class CastutilsTest(unittest.TestCase):
                                                               my_alias_enum_map__six=3,
                                                               my_alias_enum_map__sex=3,
                                                               my_alias_enum_map__fimm=2))
-        self.assertEqual(p_expect, protoplasm.casting.mkproto(enums_pb2.WithExternalEnum,
+        self.assertEqual(p_expect, protoplasm6.casting.mkproto(enums_pb2.WithExternalEnum,
                                                               my_enum=enums_pb2.TWO,
                                                               my_alias_enum=enums_pb2.SIX,
                                                               my_enum_list=[enums_pb2.ONE, enums_pb2.THREE],
@@ -688,7 +688,7 @@ class CastutilsTest(unittest.TestCase):
         p_expect2.my_internal_alias_enum_map['no9B'] = enums_pb2.WithInternalEnum.NINE
         p_expect2.my_internal_alias_enum_map['default'] = enums_pb2.WithInternalEnum.ZERO
 
-        self.assertEqual(p_expect2, protoplasm.casting.mkproto(enums_pb2.WithInternalEnum,
+        self.assertEqual(p_expect2, protoplasm6.casting.mkproto(enums_pb2.WithInternalEnum,
                                                                my_internal_enum=enums_pb2.WithInternalEnum.SIX,
                                                                my_internal_alias_enum=enums_pb2.WithInternalEnum.SEVEN,
                                                                my_internal_enum_list=[enums_pb2.WithInternalEnum.FIVE,
@@ -702,7 +702,7 @@ class CastutilsTest(unittest.TestCase):
                                                                my_internal_alias_enum_map__no9B=enums_pb2.WithInternalEnum.NINE,
                                                                my_internal_alias_enum_map__default=enums_pb2.WithInternalEnum.ZERO))
 
-        self.assertEqual(p_expect2, protoplasm.casting.mkproto(enums_pb2.WithInternalEnum,
+        self.assertEqual(p_expect2, protoplasm6.casting.mkproto(enums_pb2.WithInternalEnum,
                                                                my_internal_enum=6,
                                                                my_internal_alias_enum=7,
                                                                my_internal_enum_list=[5, 4],
@@ -735,7 +735,7 @@ class CastutilsTest(unittest.TestCase):
         dc_expect.my_alias_enum_map['sex'] = enums_dc.SEX
         dc_expect.my_alias_enum_map['fimm'] = enums_dc.FIVE
 
-        self.assertEqual(dc_expect, protoplasm.casting.mkdataclass(enums_dc.WithExternalEnum,
+        self.assertEqual(dc_expect, protoplasm6.casting.mkdataclass(enums_dc.WithExternalEnum,
                                                                    my_enum=2,
                                                                    my_alias_enum=3,
                                                                    my_enum_list=[1, 3],
@@ -745,7 +745,7 @@ class CastutilsTest(unittest.TestCase):
                                                                    my_alias_enum_map__six=3,
                                                                    my_alias_enum_map__sex=3,
                                                                    my_alias_enum_map__fimm=2))
-        self.assertEqual(dc_expect, protoplasm.casting.mkdataclass(enums_dc.WithExternalEnum,
+        self.assertEqual(dc_expect, protoplasm6.casting.mkdataclass(enums_dc.WithExternalEnum,
                                                                    my_enum=enums_dc.TWO,
                                                                    my_alias_enum=enums_dc.SIX,
                                                                    my_enum_list=[enums_dc.ONE, enums_dc.THREE],
@@ -776,7 +776,7 @@ class CastutilsTest(unittest.TestCase):
         dc_expect2.my_internal_alias_enum_map['no9B'] = enums_dc.WithInternalEnum.NINE
         dc_expect2.my_internal_alias_enum_map['default'] = enums_dc.WithInternalEnum.ZERO
 
-        self.assertEqual(dc_expect2, protoplasm.casting.mkdataclass(enums_dc.WithInternalEnum,
+        self.assertEqual(dc_expect2, protoplasm6.casting.mkdataclass(enums_dc.WithInternalEnum,
                                                                     my_internal_enum=enums_dc.WithInternalEnum.SIX,
                                                                     my_internal_alias_enum=enums_dc.WithInternalEnum.SEVEN,
                                                                     my_internal_enum_list=[enums_dc.WithInternalEnum.FIVE,
@@ -791,7 +791,7 @@ class CastutilsTest(unittest.TestCase):
                                                                     my_internal_alias_enum_map__no9B=enums_dc.WithInternalEnum.NINE,
                                                                     my_internal_alias_enum_map__default=enums_dc.WithInternalEnum.ZERO))
 
-        self.assertEqual(dc_expect2, protoplasm.casting.mkdataclass(enums_dc.WithInternalEnum,
+        self.assertEqual(dc_expect2, protoplasm6.casting.mkdataclass(enums_dc.WithInternalEnum,
                                                                     my_internal_enum=6,
                                                                     my_internal_alias_enum=7,
                                                                     my_internal_enum_list=[5, 4],

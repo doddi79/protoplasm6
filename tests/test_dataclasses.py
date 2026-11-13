@@ -1,5 +1,5 @@
 import unittest
-from protoplasm import casting
+from protoplasm6 import casting
 import os
 import sys
 import shutil
@@ -111,7 +111,7 @@ class DataclassTest(unittest.TestCase):
         sandbox.load_symbols()
 
     def test_import_collision(self):
-        from protoplasm import plasm
+        from protoplasm6 import plasm
         from typing import Type as typing_Type
         from sandbox.test.importcollision_dc import Type
         self.assertNotEqual(typing_Type, Type)
@@ -123,8 +123,8 @@ class DataclassTest(unittest.TestCase):
         self.assertTrue(issubclass(Collection, plasm.DataclassBase))
 
     def test_import_collision_via_string(self):
-        from protoplasm import plasm
-        from ccptools.tpu import strimp
+        from protoplasm6 import plasm
+        from batutils.tpu import strimp
         from typing import Type as typing_Type
         Type = strimp.get_class('sandbox.test.importcollision_dc.Type')
         self.assertNotEqual(typing_Type, Type)

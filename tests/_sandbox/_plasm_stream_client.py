@@ -1,4 +1,4 @@
-from protoplasm.plasm import *
+from protoplasm6.plasm import *
 
 from sandbox.test import river_grpc_sender
 from sandbox.test.river_dc import GuessTheNumberRequest, MarcoPoloRequest

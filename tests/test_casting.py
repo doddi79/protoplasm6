@@ -8,7 +8,7 @@ import time
 
 from tests.testutils import *
 
-from protoplasm import casting
+from protoplasm6 import casting
 
 import logging
 log = logging.getLogger(__name__)

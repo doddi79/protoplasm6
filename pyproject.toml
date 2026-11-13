@@ -1,32 +1,33 @@
 [build-system]
-requires = [ "setuptools>=42", "wheel" ]
+requires = [ "setuptools>=77", "wheel" ]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "protoplasm"
+name = "protoplasm6"
 dynamic = ["version"]
-description = "Utilities for working with Protobuf & gRPC in Python."
+description = "Utilities for working with Protobuf & gRPC in Python (a continuation fork of CCP Games' protoplasm)."
 readme = { file = "README.md", content-type = "text/markdown" }
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = [ "LICENSE" ]
+requires-python = ">=3.10"
 authors = [
-    { name = "Thordur Matthiasson", email = "thordurm@ccpgames.com" },
+    { name = "Thordur Matthiasson", email = "doddi79@gmail.com" },
     { name = "Daniel Maxson", email = "dmaxson@ccpgames.com" }
 ]
-keywords = [ "protobuf", "proto", "dataclasses", "tools", "ccp", "utils" ]
+keywords = [ "protobuf", "proto", "grpc", "dataclasses", "neobuf", "protoplasm", "tools", "utils" ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
-
-    "License :: OSI Approved :: MIT License",
 
     "Intended Audience :: Developers",
 
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 
     "Topic :: Software Development",
     "Topic :: Software Development :: Libraries",
@@ -35,23 +36,26 @@ classifiers = [
 ]
 
 dependencies = [
-    "ccptools >= 1.1, <2",
-    "protobuf == 5.27.2",
-    "grpcio >=1.66.1, <2",
-    "grpcio-tools >=1.66.1, <2",
-    "googleapis-common-protos >=1.65, <2"
+    "batutils >=2.2, <3",
+    "protobuf >=7.34, <8",
+    "grpcio >=1.80, <2"
+]
+
+[project.optional-dependencies]
+googleapis = [
+    "googleapis-common-protos >=1.70, <2"
 ]
 
 [project.urls]
-Homepage = "https://github.com/ccpgames/protoplasm"
-Documentation = "https://github.com/ccpgames/protoplasm/blob/main/README.md"
-Repository = "https://github.com/ccpgames/protoplasm.git"
-Issues = "https://github.com/ccpgames/protoplasm/issues"
-Changelog = "https://github.com/ccpgames/protoplasm/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/doddi79/protoplasm6"
+Documentation = "https://github.com/doddi79/protoplasm6/blob/main/README.md"
+Repository = "https://github.com/doddi79/protoplasm6.git"
+Issues = "https://github.com/doddi79/protoplasm6/issues"
+Changelog = "https://github.com/doddi79/protoplasm6/blob/main/CHANGELOG.md"
 
 [tool.setuptools.dynamic]
-version = {attr = "protoplasm.__version__"}
+version = {attr = "protoplasm6.__version__"}
 
 [tool.setuptools.packages.find]
 where = [ "." ]
-exclude = [ "tests", "tests.*" ]
+include = [ "protoplasm6", "protoplasm6.*" ]

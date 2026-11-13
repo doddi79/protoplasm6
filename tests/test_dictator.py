@@ -7,9 +7,9 @@ import sys
 import shutil
 import time
 
-from protoplasm import casting
-from protoplasm.casting import dictator
-from protoplasm.casting import castutils
+from protoplasm6 import casting
+from protoplasm6.casting import dictator
+from protoplasm6.casting import castutils
 
 from tests.testutils import *
 
