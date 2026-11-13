@@ -90,7 +90,7 @@ class TimeoutResponseIterator(IResponseIterator, Generic[T_DCB]):
         Note that `next()` will block until it receives a value to return
         from the stream OR it times out.
 
-        If raise_timeout is True then a ResponseIterationTimoutError will be
+        If raise_timeout is True then a ResponseIterationTimeoutError will be
         raised in case of a timeout but if not, then the iteration loop will
         simply end if this is used as such (StopIteration is raised) or the
         timed-out `next()` call returns None.
@@ -131,7 +131,7 @@ class TimeoutResponseIterator(IResponseIterator, Generic[T_DCB]):
             self._timed_out = True
             self.close()
             if raise_timeout:
-                raise ResponseIterationTimoutError(f'timout while waiting for next response from'
+                raise ResponseIterationTimeoutError(f'timout while waiting for next response from'
                                                    f' {self._response_iterator._wrapper.method_name}')  # noqa
             else:
                 log.info(f'stopping iteration after timeout')

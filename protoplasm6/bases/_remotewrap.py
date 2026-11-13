@@ -18,6 +18,7 @@ from protoplasm6 import errors
 
 from .dataclass_bases import *
 from ._exwrap import *
+from ._metadata import resolve_metadata
 
 import logging
 log = logging.getLogger(__name__)
@@ -205,17 +206,23 @@ class RemoteMethodWrapper:
         self.prepare()
 
         try:
+            metadata = resolve_metadata(self.client)
+        except Exception as ex:
+            self._abort_preflight('Error while resolving call metadata', ex)
+            raise  # Never reached (the abort raises) but makes linters happy
+
+        try:
             if self.method_io.is_input_stream():
                 if self.method_io.is_output_stream():
-                    self.response_iterator = self.stub_method(self.request_proto_iterator)
+                    self.response_iterator = self.stub_method(self.request_proto_iterator, metadata=metadata)
                 else:
-                    self.response_proto = self.stub_method(self.request_proto_iterator)
+                    self.response_proto = self.stub_method(self.request_proto_iterator, metadata=metadata)
 
             else:
                 if self.method_io.is_output_stream():
-                    self.response_iterator = self.stub_method(self.request_proto)
+                    self.response_iterator = self.stub_method(self.request_proto, metadata=metadata)
                 else:
-                    self.response_proto = self.stub_method(self.request_proto)
+                    self.response_proto = self.stub_method(self.request_proto, metadata=metadata)
 
         except grpc.RpcError as ex:
             self._abort_inflight('RpcError exception while performing gRPC request', ex)

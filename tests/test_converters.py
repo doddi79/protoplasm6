@@ -76,6 +76,13 @@ def _samples():
                                  how_long=datetime.timedelta(hours=1), whens=[NOW], blob=b'blob', blobs=[b'1', b'2'],
                                  big=2 ** 62, bigs=[1, 2], ratio=0.125, my_enum=enums_dc.ExternalEnum.TWO,
                                  my_alias_enums=[enums_dc.ExternalAliasEnum.FOUR, enums_dc.ExternalAliasEnum.SIX]),
+        converters_dc.PresenceMessage(maybe_string='maybe', maybe_long=12, plain_string='plain',
+                                      maybe_message=sub, choice_int=42),
+        converters_dc.PresenceMessage(),
+        converters_dc.PresenceMessage(choice_timestamp=NOW),
+        converters_dc.PresenceMessage(choice_message=rainbow_dc.SubMessage()),
+        converters_dc.PresenceMessage(choice_string='c', maybe_enum=enums_dc.ExternalEnum.ONE),
+        converters_dc.Everything(presence=converters_dc.PresenceMessage(choice_string='c')),
     ]
 
 
@@ -85,14 +92,6 @@ def _direct_only_samples():
     from sandbox.test import rainbow_dc, converters_dc, enums_dc
     sub = rainbow_dc.SubMessage(foo='foo', bar='bar')
     return [
-        # The DictConverter sends every oneof member (as they all have default
-        # values in the dataclass) which protobuf rejects
-        converters_dc.PresenceMessage(maybe_string='maybe', maybe_long=12, plain_string='plain',
-                                      maybe_message=sub, choice_int=42),
-        converters_dc.PresenceMessage(choice_timestamp=NOW),
-        converters_dc.PresenceMessage(choice_message=rainbow_dc.SubMessage()),
-        converters_dc.PresenceMessage(choice_string='c', maybe_enum=enums_dc.ExternalEnum.ONE),
-        converters_dc.Everything(presence=converters_dc.PresenceMessage(choice_string='c')),
         # The DictConverter sends None for empty lists of google.protobuf.Value
         # which protobuf's ParseDict chokes on
         converters_dc.JsonValues(),
@@ -215,10 +214,12 @@ class DirectConverterFixesTest(unittest.TestCase):
                          DIRECT.dataclass_to_proto(converters_dc.PresenceMessage(choice_timestamp=NOW)).WhichOneof('choice'))
         self.assertEqual('choice_message', DIRECT.dataclass_to_proto(converters_dc.PresenceMessage(
             choice_message=rainbow_dc.SubMessage())).WhichOneof('choice'))
+        # Setting a oneof member resets the others (like protobuf) so to get
+        # two of them set we need to sneak past __setattr__
+        both = converters_dc.PresenceMessage(choice_string='a')
+        object.__setattr__(both, 'choice_int', 1)
         with self.assertRaises(ValueError):
-            DIRECT.dataclass_to_proto(converters_dc.PresenceMessage(choice_string='a', choice_int=1))
-        with self.assertRaises(Exception):  # The DictConverter fails for any of these
-            DICT.dataclass_to_proto(converters_dc.PresenceMessage(choice_string='a'))
+            DIRECT.dataclass_to_proto(both)
 
     def test_timezone_aware_timestamps(self):
         from sandbox.test import rainbow_dc

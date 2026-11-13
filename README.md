@@ -6,6 +6,9 @@ initializing large/nested Protobuf objects, and simplified gRPC service
 interfaces where you implement plain Python methods with plain Python arguments
 and return values instead of fiddling with request/response messages.
 
+See the **[Public API index](docs/api-index.md)** for a task-oriented reference of
+everything protoplasm6 offers.
+
 ## Note
 
 This is a fork of the [`protoplasm`](https://github.com/ccpgames/protoplasm)
@@ -147,6 +150,15 @@ dataclass instances and will be forced into the correct dataclass type.
 `datetime.timedelta`, `Any` fields hold any dataclass, and `Struct`/`Value`
 fields hold plain dicts/values.
 
+Dataclasses of messages with `oneof` groups behave like protobuf messages:
+setting one member resets the others, and you can ask which one is set:
+
+```python
+payment.which_oneof('method')  # e.g. 'card_number' or None
+payment.get_oneof('method')    # The value of the member that's set (or None)
+payment.clear_oneof('method')
+```
+
 ### Casting utilities
 
 ```python
@@ -268,6 +280,23 @@ try:
 except plasm.NotFound:
     ...  # gRPC status codes are raised as the corresponding plasm errors
 ```
+
+#### Call metadata (headers)
+
+To send metadata (i.e. headers, e.g. for authorization) with calls, give the
+client a `metadata` dict (or a callable returning one, which gets called for
+every call, e.g. to refresh tokens) and/or use the `call_metadata` context
+manager:
+
+```python
+orders = OrderService('localhost:50051', metadata={'authorization': f'Bearer {token}'})
+
+with plasm.call_metadata({'x-request-id': 'r1'}):  # For all calls in this block
+    orders.get_order('o1')
+```
+
+On the service side, decorate a method with `@plasm.takes_context` to get a
+`context` argument and read headers with `context.get_meta('authorization')`.
 
 Streaming RPCs (`stream` in the proto) are supported as well, with
 `plasm.RequestIterator` / `plasm.ResponseIterator` on either side (see

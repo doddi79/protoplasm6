@@ -39,6 +39,13 @@ def _dict_value_to_field_value(field: dataclasses.Field, v: Any, dataclass_type:
     is_obj = field.metadata.get('is_obj', False)
     is_list = field.metadata.get('is_list', False)
     is_map = field.metadata.get('is_map', False)
+    if v is None:  # `dataclass_to_dict` turns unset messages and empty lists and maps into None
+        if is_map:
+            return {}
+        if is_list:
+            return []
+        if is_obj:
+            return None  # ...and NOT an empty message object (see issue #10)
     if is_obj:
         field_type = castutils.get_dc_field_obj_type(field, dataclass_type)
         if is_map:

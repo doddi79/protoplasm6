@@ -1,6 +1,7 @@
 __all__ = [
     'ProtoplasmError',
     'ServiceApiException',
+    'ResponseIterationTimeoutError',
     'ResponseIterationTimoutError',
 ]
 
@@ -20,5 +21,11 @@ class ServiceApiException(ProtoplasmError):
         self.ref_code = ref_code
 
 
-class ResponseIterationTimoutError(ProtoplasmError, TimeoutError):
+class ResponseIterationTimeoutError(ProtoplasmError, TimeoutError):
+    """Raised when waiting for the next response of a streaming RPC (via
+    `ResponseIterator.with_timeout()`) times out."""
     pass
+
+
+# Deprecated (misspelled) name, kept for backwards compatibility
+ResponseIterationTimoutError = ResponseIterationTimeoutError

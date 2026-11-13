@@ -20,9 +20,14 @@ class DictConverter(BaseConverter):
     name = 'dict'
 
     def dataclass_to_proto(self, dc: DataclassBase) -> GeneratedProtocolMessageType:
-        from protoplasm6.casting.dictator import dataclass_to_dict
+        from protoplasm6.casting.dictator import dataclass_to_dict, _OMIT_UNSET_ONEOFS  # noqa
         from protoplasm6.casting.objectifier import dict_to_proto
-        return dict_to_proto(dc.__proto_cls__, dataclass_to_dict(dc))
+        token = _OMIT_UNSET_ONEOFS.set(True)
+        try:
+            d = dataclass_to_dict(dc)
+        finally:
+            _OMIT_UNSET_ONEOFS.reset(token)
+        return dict_to_proto(dc.__proto_cls__, d)
 
     def proto_to_dataclass(self, proto: GeneratedProtocolMessageType,
                            dataclass_type: Optional[Type[T_DCB]] = None) -> T_DCB:

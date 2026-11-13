@@ -47,7 +47,7 @@ class GrpcContext(BaseContext):
         return self._origin_ip
 
     def get_meta(self, name, default=None):
-        return self.metadata.get(name, default)
+        return self.metadata.get(name.lower(), default)
 
     def __repr__(self):
         return 'GrpcContext[metadata=%r, peer=%r]' % (self.metadata, self.wrapped_context.peer())

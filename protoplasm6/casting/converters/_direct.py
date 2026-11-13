@@ -9,6 +9,7 @@ from google.protobuf import json_format
 from google.protobuf import message_factory
 
 from protoplasm6.structs import *
+from protoplasm6.structs import _oneofs
 from protoplasm6.casting import dictators
 from protoplasm6.casting.converters._base import *
 
@@ -56,18 +57,6 @@ _INT_CPP_TYPES = {_FD.CPPTYPE_INT32, _FD.CPPTYPE_INT64, _FD.CPPTYPE_UINT32, _FD.
 _FLOAT_CPP_TYPES = {_FD.CPPTYPE_FLOAT, _FD.CPPTYPE_DOUBLE}
 
 
-def _real_oneof_name(fd: _FD) -> Optional[str]:
-    """The name of the (real, i.e. not the synthetic one proto3 `optional`
-    fields get) oneof the field belongs to, if any.
-    """
-    oneof = fd.containing_oneof
-    if oneof is None:
-        return None
-    if len(oneof.fields) == 1 and oneof.name == f'_{fd.name}':  # Synthetic (proto3 optional)
-        return None
-    return oneof.name
-
-
 class _FieldPlan:
     """Everything needed to convert one field, worked out once per dataclass
     type (so the per-object conversion does as little thinking as possible).
@@ -87,7 +76,7 @@ class _FieldPlan:
         self.enum_by_name = None
         self.has_presence = fd.has_presence
         self.default = fd.default_value if not fd.is_repeated else None
-        self.oneof = _real_oneof_name(fd)
+        self.oneof = _oneofs.real_oneof_name(fd)
 
 
 class _Plan:

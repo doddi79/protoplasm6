@@ -5,10 +5,18 @@ __all__ = [
 from protoplasm6.casting import dictators
 from protoplasm6.structs import *
 
+from protoplasm6.structs import _oneofs
 from google.protobuf import json_format
+import contextvars
 
 import logging
 log = logging.getLogger(__name__)
+
+# When set, `dataclass_to_dict` leaves out oneof members that aren't set (i.e.
+# have their default values) since `json_format.ParseDict` refuses dicts with
+# more than one member of the same oneof group. Used by the DictConverter.
+_OMIT_UNSET_ONEOFS: contextvars.ContextVar[bool] = contextvars.ContextVar('protoplasm6_omit_unset_oneofs',
+                                                                          default=False)
 
 
 def proto_to_dict(proto: GeneratedProtocolMessageType) -> Dict:
@@ -34,7 +42,10 @@ def dataclass_to_dict(dc) -> Dict:
         return dataclasses.asdict(dc)
 
     d = {}
+    oneof_members = _oneofs.get_oneof_member_map(type(dc)) if _OMIT_UNSET_ONEOFS.get() else None
     for field in dataclasses.fields(dc):
+        if oneof_members and field.name in oneof_members                 and _oneofs.is_unset_value(field, getattr(dc, field.name)):
+            continue
         dicted = _dataclass_field_to_dict_field(field, dc)
         if dicted is not ...:
             d[_get_proto_field_name(field)] = dicted

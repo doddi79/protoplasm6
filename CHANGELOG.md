@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.1.0] - 2026-11-14
+
+### Added
+
+- Custom call metadata (i.e. headers, e.g. for JWT authorization) for gRPC
+  clients ([protoplasm#8](https://github.com/ccpgames/protoplasm/issues/8)):
+  - A `metadata` argument (and attribute) on clients
+    (`BaseGrpcClientImplementation`) taking a dict, `(key, value)` pairs or a
+    callable returning either (called for every call, e.g. to refresh tokens)
+  - `plasm.call_metadata(...)` context manager adding metadata to all calls
+    within its block (in the current thread/context) and
+    `client.call_metadata(...)` for a single client
+  - `plasm.MetadataSpec` type
+- Oneof support in dataclasses
+  ([protoplasm#4](https://github.com/ccpgames/protoplasm/issues/4)):
+  - `which_oneof(group)`, `get_oneof(group, default=None)`,
+    `clear_oneof(group)` and the `oneof_groups()` class method on
+    `DataclassBase`
+  - Setting a oneof member on a dataclass resets the other members of its
+    group (just like protobuf messages do)
+- `plasm.ResponseIterationTimeoutError` (the correctly spelled name of
+  `ResponseIterationTimoutError`, which is kept as a deprecated alias)
+- A task-oriented [Public API index](docs/api-index.md) (for humans and LLMs
+  alike)
+
+### Changed
+
+- The `DictConverter` now leaves out unset oneof members when converting
+  dataclasses to protobuf (it used to send them all, which protobuf rejects)
+- `GrpcContext.get_meta()` is now case-insensitive (gRPC metadata keys are
+  always lower case)
+
+### Fixed
+
+- Unset (`None`) messages turning into empty messages (and empty lists of
+  messages crashing) when going through dicts, e.g. via `to_dict()` /
+  `from_dict()`, `to_json()` / `from_json()` and `from_clone()`
+  ([protoplasm#10](https://github.com/ccpgames/protoplasm/issues/10))
+- `from_clone()` breaking `oneof` fields
+  ([protoplasm#9](https://github.com/ccpgames/protoplasm/issues/9))
+
+
 ## [6.0.0] - 2026-11-14
 
 Forked and renamed!!

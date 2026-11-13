@@ -9,6 +9,7 @@ import json
 import base64
 
 from protoplasm6.structs._base import *
+from protoplasm6.structs import _oneofs
 import dataclasses
 
 import logging
@@ -22,9 +23,36 @@ T_DCB = TypeVar('T_DCB', bound='DataclassBase')
 _OBJ_FIELDS_CACHE: Dict[type, Tuple[Tuple[dataclasses.Field, bool, bool], ...]] = {}
 
 
+def _has_real_oneofs(proto_cls: Any) -> bool:
+    desc = getattr(proto_cls, 'DESCRIPTOR', None)
+    if desc is None:
+        return False
+    return any(_oneofs.real_oneof_name(fd) for fd in desc.fields)
+
+
+def _oneof_setattr(self, name: str, value: Any):
+    """`__setattr__` for dataclasses with oneof groups that, just like
+    protobuf messages, resets the other members of a oneof group when one of
+    them gets set.
+    """
+    object.__setattr__(self, name, value)
+    member = _oneofs.get_oneof_member_map(type(self)).get(name)
+    if member is not None and not _oneofs.is_unset_value(member.field, value):
+        for other in _oneofs.get_oneof_members(type(self))[member.group]:
+            if other.dc_name != name:
+                object.__setattr__(self, other.dc_name, _oneofs.get_field_default(other.field))
+
+
 @dataclasses.dataclass
 class DataclassBase(Generic[T_DCB]):
     __proto_cls__: ClassVar[GeneratedProtocolMessageType]
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        # Only dataclasses with oneof groups get the (slower) oneof aware
+        # __setattr__
+        if '__setattr__' not in cls.__dict__ and _has_real_oneofs(cls.__dict__.get('__proto_cls__')):
+            cls.__setattr__ = _oneof_setattr
 
     def __post_init__(self):
         obj_fields = _OBJ_FIELDS_CACHE.get(type(self))
@@ -48,6 +76,55 @@ class DataclassBase(Generic[T_DCB]):
                         f_val[i] = castutils.force_object(f_type, f_val[i])
                 else:
                     setattr(self, f.name, castutils.force_object(f_type, f_val))
+
+    @classmethod
+    def oneof_groups(cls) -> Dict[str, Tuple[str, ...]]:
+        """Returns the oneof groups of this dataclass (by name) and the
+        (dataclass) names of the fields in each of them.
+        """
+        return {k: tuple(m.dc_name for m in v) for k, v in _oneofs.get_oneof_members(cls).items()}
+
+    def _get_oneof_group(self, group: str) -> Tuple[_oneofs.OneofMember, ...]:
+        members = _oneofs.get_oneof_members(type(self)).get(group)
+        if members is None:
+            raise ValueError(f'{type(self).__name__} has no oneof group called "{group}"')
+        return members
+
+    def which_oneof(self, group: str) -> Optional[str]:
+        """Returns the (dataclass) name of the field that's set in the given
+        oneof group or None if none of them is (like protobuf's
+        `WhichOneof()`).
+
+        Note that since dataclasses give oneof scalar fields default values
+        (e.g. `''` and `0`), a field with its default value counts as not set
+        (protobuf can't tell the difference on the wire either).
+
+        :raises ValueError: If there's no oneof group with the given name
+        """
+        for m in self._get_oneof_group(group):
+            if not _oneofs.is_unset_value(m.field, getattr(self, m.dc_name)):
+                return m.dc_name
+        return None
+
+    def get_oneof(self, group: str, default: Any = None) -> Any:
+        """Returns the value of the field that's set in the given oneof group
+        (or the given default if none of them is).
+
+        :raises ValueError: If there's no oneof group with the given name
+        """
+        name = self.which_oneof(group)
+        if name is None:
+            return default
+        return getattr(self, name)
+
+    def clear_oneof(self, group: str):
+        """Resets all the fields in the given oneof group to their defaults
+        (like protobuf's `ClearField()` with a oneof name).
+
+        :raises ValueError: If there's no oneof group with the given name
+        """
+        for m in self._get_oneof_group(group):
+            object.__setattr__(self, m.dc_name, _oneofs.get_field_default(m.field))
 
     def to_dict(self) -> Dict:
         """Turns this `DataclassBase` into a dict of its fields and values
