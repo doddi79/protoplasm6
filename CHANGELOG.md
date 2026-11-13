@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- GitHub workflows (like the original ones, minus the Docker image stuff):
+  unit tests on Python 3.10-3.14 for pushes to `main` and all pull requests,
+  and publishing to PyPI when a GitHub release is created (with a check that
+  the release tag matches the package version). The tests install
+  `neobuilder6` from the branch with the same name in its repo (or `main`)
 - Custom call metadata (i.e. headers, e.g. for JWT authorization) for gRPC
   clients ([protoplasm#8](https://github.com/ccpgames/protoplasm/issues/8)):
   - A `metadata` argument (and attribute) on clients
