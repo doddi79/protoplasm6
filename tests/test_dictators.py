@@ -4,9 +4,9 @@ import dataclasses
 import base64
 import enum
 
-import protoplasm.bases.dataclass_bases
-from protoplasm.casting import dictators
-from protoplasm import bases
+import protoplasm6.bases.dataclass_bases
+from protoplasm6.casting import dictators
+from protoplasm6 import bases
 import collections
 
 import os
@@ -31,7 +31,7 @@ class FauxEnum(enum.IntEnum):
 
 
 @dataclasses.dataclass
-class FauxDataClass(protoplasm.bases.dataclass_bases.DataclassBase):
+class FauxDataClass(protoplasm6.bases.dataclass_bases.DataclassBase):
     string: str = dataclasses.field(default=None)
     integer: int = dataclasses.field(default=None)
     floating: float = dataclasses.field(default=None)
@@ -40,7 +40,7 @@ class FauxDataClass(protoplasm.bases.dataclass_bases.DataclassBase):
     timestamp: datetime.datetime = dataclasses.field(default=None)
     enumerator: FauxEnum = dataclasses.field(default=None)
     duration: datetime.timedelta = dataclasses.field(default=None)
-    any: protoplasm.bases.dataclass_bases.DataclassBase = dataclasses.field(default=None)
+    any: protoplasm6.bases.dataclass_bases.DataclassBase = dataclasses.field(default=None)
 
 
 def _get_field_map(dc):
@@ -323,7 +323,7 @@ class AnyDictatorTest(unittest.TestCase):
             shutil.rmtree(build_package)
             time.sleep(0.1)
 
-        from neobuilder.neobuilder import NeoBuilder
+        from neobuilder6.neobuilder import NeoBuilder
 
         # Build stuff...
         builder = NeoBuilder(package='sandbox',
@@ -347,7 +347,7 @@ class AnyDictatorTest(unittest.TestCase):
         dc = FauxDataClass(any=rainbow_dc.SubMessage('FOO!', 'BAR!!'))
 
         self.assertIsNotNone(dc.any)
-        self.assertIsInstance(dc.any, protoplasm.bases.dataclass_bases.DataclassBase)
+        self.assertIsInstance(dc.any, protoplasm6.bases.dataclass_bases.DataclassBase)
         self.assertIsInstance(dc.any, rainbow_dc.SubMessage)
 
         expected = collections.OrderedDict([
@@ -385,6 +385,6 @@ class AnyDictatorTest(unittest.TestCase):
         dc.my_any = caster(input_value, _get_field_map(dc)['my_any'], dc.__class__)
 
         self.assertIsNotNone(dc.my_any)
-        self.assertIsInstance(dc.my_any, protoplasm.bases.dataclass_bases.DataclassBase)
+        self.assertIsInstance(dc.my_any, protoplasm6.bases.dataclass_bases.DataclassBase)
         self.assertIsInstance(dc.my_any, rainbow_dc.SubMessage)
         self.assertEqual(rainbow_dc.SubMessage('FOO!', 'BAR!!'), dc.my_any)

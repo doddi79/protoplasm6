@@ -1,6 +1,6 @@
 import unittest
 import base64
-from protoplasm.casting import castutils
+from protoplasm6.casting import castutils
 
 import logging
 

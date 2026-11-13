@@ -7,7 +7,7 @@ import time
 
 import grpc
 
-from protoplasm import errors
+from protoplasm6 import errors
 
 from tests.testutils import *
 

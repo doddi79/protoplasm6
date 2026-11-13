@@ -3,7 +3,7 @@ import grpc
 from concurrent import futures
 from unittesting.unary.unaryservice_api import UnaryServiceInterface
 from unittesting.unary.unaryservice_grpc_receiver import UnaryServiceGrpcServicer
-from protoplasm import errors
+from protoplasm6 import errors
 
 import logging
 log = logging.getLogger(__name__)

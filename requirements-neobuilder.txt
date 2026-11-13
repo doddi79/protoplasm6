@@ -1,1 +1,1 @@
-neobuilder >=5.3, <6
+neobuilder6 >=6.1, <7

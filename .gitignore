@@ -15,3 +15,6 @@ venv*/
 /build/
 /tests/res/build/
 !/tests/res/build/empty.txt
+# Packaging
+*.egg-info/
+/dist/

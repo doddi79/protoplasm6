@@ -4,7 +4,7 @@ from sandbox.test.river_dc import *
 from sandbox.test.river_api import StreamingServiceInterface
 from sandbox.test.river_grpc_receiver import StreamingServiceGrpcServicer
 
-from protoplasm.plasm import *
+from protoplasm6.plasm import *
 
 import random
 

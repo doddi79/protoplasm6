@@ -5,6 +5,167 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.1.0] - 2026-11-14
+
+### Added
+
+- GitHub workflows (like the original ones, minus the Docker image stuff):
+  unit tests on Python 3.10-3.14 for pushes to `main` and all pull requests,
+  and publishing to PyPI when a GitHub release is created (with a check that
+  the release tag matches the package version). The tests install
+  `neobuilder6` from the branch with the same name in its repo (or `main`)
+- Custom call metadata (i.e. headers, e.g. for JWT authorization) for gRPC
+  clients ([protoplasm#8](https://github.com/ccpgames/protoplasm/issues/8)):
+  - A `metadata` argument (and attribute) on clients
+    (`BaseGrpcClientImplementation`) taking a dict, `(key, value)` pairs or a
+    callable returning either (called for every call, e.g. to refresh tokens)
+  - `plasm.call_metadata(...)` context manager adding metadata to all calls
+    within its block (in the current thread/context) and
+    `client.call_metadata(...)` for a single client
+  - `plasm.MetadataSpec` type
+- Oneof support in dataclasses
+  ([protoplasm#4](https://github.com/ccpgames/protoplasm/issues/4)):
+  - `which_oneof(group)`, `get_oneof(group, default=None)`,
+    `clear_oneof(group)` and the `oneof_groups()` class method on
+    `DataclassBase`
+  - Setting a oneof member on a dataclass resets the other members of its
+    group (just like protobuf messages do)
+- `plasm.ResponseIterationTimeoutError` (the correctly spelled name of
+  `ResponseIterationTimoutError`, which is kept as a deprecated alias)
+- A task-oriented [Public API index](docs/api-index.md) (for humans and LLMs
+  alike)
+
+### Changed
+
+- The `DictConverter` now leaves out unset oneof members when converting
+  dataclasses to protobuf (it used to send them all, which protobuf rejects)
+- `GrpcContext.get_meta()` is now case-insensitive (gRPC metadata keys are
+  always lower case)
+
+### Fixed
+
+- Unset (`None`) messages turning into empty messages (and empty lists of
+  messages crashing) when going through dicts, e.g. via `to_dict()` /
+  `from_dict()`, `to_json()` / `from_json()` and `from_clone()`
+  ([protoplasm#10](https://github.com/ccpgames/protoplasm/issues/10))
+- `from_clone()` breaking `oneof` fields
+  ([protoplasm#9](https://github.com/ccpgames/protoplasm/issues/9))
+
+
+## [6.0.0] - 2026-11-14
+
+Forked and renamed!!
+
+### Added
+
+- This project by forking [`protoplasm`](https://github.com/ccpgames/protoplasm)
+  (v5.3.1) in order to continue its development and maintenance
+- Pluggable protobuf <-> dataclass converters in the new
+  `protoplasm6.casting.converters` module:
+  - `DirectConverter` (`'direct'`, the default) that converts directly
+    between protobuf messages and dataclasses using the protobuf message API,
+    which is roughly 4-7 times faster than the original conversion (both ways)
+  - `DictConverter` (`'dict'`) which is the original protoplasm conversion via
+    `json_format` dicts
+  - `get_converter()`, `set_converter()`, the `use_converter()` context
+    manager, `register_converter()` and the `PROTOPLASM6_CONVERTER`
+    environment variable for choosing which one is used
+  - `BaseConverter` for rolling your own
+- Optional `dataclass_type` argument to `casting.proto_to_dataclass()`
+- Support for modern type annotations in `castutils.check_type` (and thus in
+  `require_params(typecheck=True)`), i.e. builtin generics like `list[int]`
+  and `dict[str, Foo]` (PEP 585) and `X | Y` unions (PEP 604)
+- Official support (as in: unit tests) for Python 3.10, 3.11, 3.12, 3.13 and
+  3.14
+- `googleapis` optional extra (`pip install protoplasm6[googleapis]`) for
+  those who still want `googleapis-common-protos` installed alongside
+- Unit tests checking that both converters give the same results (and for the
+  cases where they don't, see below)
+- A proper README, including the "monolith first, split into services later"
+  idea behind the service interfaces
+
+### Changed
+
+- Renamed the package (and the module) from `protoplasm` to `protoplasm6`
+  - So `from protoplasm import plasm` is now `from protoplasm6 import plasm`
+    etc.
+- Replaced the dependency on `ccptools` with its continuation fork
+  [`batutils`](https://github.com/doddi79/batutils)
+- Bumped dependencies to their latest major versions:
+  - `protobuf` from `==5.27.2` to `>=7.34, <8`
+  - `grpcio` from `>=1.66.1` to `>=1.80, <2`
+- `DataclassBase.to_proto()`, `DataclassBase.from_proto()`,
+  `casting.proto_to_dataclass()`, `casting.dataclass_to_proto()` and thus all
+  gRPC senders and receivers now use the current converter (i.e. the
+  `DirectConverter` by default)
+- `DataclassBase.__post_init__` now caches which fields need casting per
+  dataclass type, making creating dataclasses faster
+- `castutils.check_type` now checks members of `Union`/`Optional` annotations
+  recursively (e.g. `Optional[List[int]]` used to raise a `TypeError`)
+  and checks `TypeVar` bounds
+- Unit tests now run Neobuilder6 using the current Python interpreter
+  (`sys.executable`) instead of whatever `python` is on the `PATH`
+- Modernized packaging metadata (SPDX license, `requires-python`)
+
+### Removed
+
+- Official support for Python 3.8 and 3.9 (as in: removed from unit tests
+  and `requires-python` is now `>=3.10`, as required by `protobuf` 7 anyway)
+- `grpcio-tools` as a dependency since protoplasm6 itself never used it (it's
+  now a dependency of `neobuilder6`, which actually uses it)
+- `googleapis-common-protos` as a hard dependency (it was never used by
+  protoplasm itself, see the new `googleapis` extra above)
+- All of the old CCP GitHub workflows (unit tests, PyPI publishing and the
+  Docker image building which pushed to CCP's Docker Hub registry) and the
+  Dockerfiles, for now at least
+- Python <3.9 compatibility code paths
+
+### Fixed
+
+When using the (default) `DirectConverter`, compared to the original
+protoplasm conversion (i.e. the `DictConverter`):
+
+- Maps with integer keys (e.g. `Dict[int, str]`) keep their `int` keys
+  (the `DictConverter` gives them `str` keys since JSON object keys are
+  always strings)
+- Maps with `bool` keys work (the `DictConverter` fails to convert them to
+  protobuf)
+- Timezone aware `datetime` values are correctly converted to UTC (the
+  `DictConverter` ignores their timezone)
+- Messages with scalar `oneof` members work (the `DictConverter` fails to
+  convert them to protobuf since all oneof members have default values in the
+  dataclass, so it sends them all) and setting more than one member of the
+  same oneof raises a `ValueError`
+- Empty `repeated google.protobuf.Value` fields work (the `DictConverter`
+  sends them as `None` which `json_format.ParseDict` fails on)
+- `Duration` and `Timestamp` values keep their full microsecond precision
+
+Also:
+
+- The `ValueError` raised by `dict_to_dataclass()` on unknown fields was
+  itself raising an `AttributeError` (because it referenced the missing field)
+
+### Known issues
+
+- Neobuilder6 gives proto3 `optional` scalar fields and scalar `oneof` members
+  non-`None` default values in the generated dataclasses (e.g. `''` and `0`)
+  so `optional` fields are always "present" in protobuf messages made from
+  dataclasses and setting a scalar oneof member to its default value (e.g.
+  `0`) is the same as not setting it
+
+
+---
+
+_Everything below is the history of the original
+[`protoplasm`](https://github.com/ccpgames/protoplasm) package by CCP Games._
+
+## [5.3.1] - 2024-09-24
+
+### Fixed
+
+- Dependency on the correct protobuf version now!
+
+
 ## [5.3.0] - 2024-09-24
 
 ### Added

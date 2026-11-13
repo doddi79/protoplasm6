@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package sandbox.test;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/struct.proto";
+import "sandbox/test/enums.proto";
+import "sandbox/test/rainbow.proto";
+
+
+message PresenceMessage {
+    optional string maybe_string = 1;
+    optional int64 maybe_long = 2;
+    optional ExternalEnum maybe_enum = 3;
+    optional bool maybe_bool = 4;
+    string plain_string = 5;
+    sandbox.test.SubMessage maybe_message = 6;
+
+    oneof choice {
+        string choice_string = 10;
+        int32 choice_int = 11;
+        sandbox.test.SubMessage choice_message = 12;
+        google.protobuf.Timestamp choice_timestamp = 13;
+    }
+}
+
+
+message KeyedMaps {
+    map<int32, string> int_keys = 1;
+    map<int64, sandbox.test.SubMessage> long_keys = 2;
+    map<bool, string> bool_keys = 3;
+    map<uint32, google.protobuf.Timestamp> timestamps = 4;
+    map<sint64, ExternalEnum> enums = 5;
+}
+
+
+message JsonValues {
+    google.protobuf.Struct my_struct = 1;
+    google.protobuf.Value my_value = 2;
+    repeated google.protobuf.Value my_value_list = 3;
+    google.protobuf.ListValue my_list_value = 4;
+    map<string, google.protobuf.Struct> my_struct_map = 5;
+}
+
+
+message Everything {
+    sandbox.test.SubMessage sub = 1;
+    repeated sandbox.test.SubMessage subs = 2;
+    map<string, sandbox.test.SubMessage> sub_map = 3;
+    google.protobuf.Timestamp when = 4;
+    google.protobuf.Duration how_long = 5;
+    repeated google.protobuf.Timestamp whens = 6;
+    bytes blob = 7;
+    repeated bytes blobs = 8;
+    int64 big = 9;
+    repeated uint64 bigs = 10;
+    double ratio = 11;
+    ExternalEnum my_enum = 12;
+    repeated ExternalAliasEnum my_alias_enums = 13;
+    PresenceMessage presence = 14;
+}

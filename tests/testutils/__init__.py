@@ -53,7 +53,7 @@ def build_new_protos(package_name: str = 'sandbox'):
         shutil.rmtree(build_package)
         time.sleep(0.1)
 
-    # from neobuilder.neobuilder import NeoBuilder
+    # from neobuilder6.neobuilder import NeoBuilder
     #
     ## Build stuff...
     # builder = NeoBuilder(package='sandbox',
@@ -62,7 +62,7 @@ def build_new_protos(package_name: str = 'sandbox'):
     # builder.build()
     log.info(f'{PROJECT_ROOT=}')
 
-    stdout, stderr, retcode = run_command(f'python -m neobuilder.cli.neobuilder -b {BUILD_ROOT} {package_name} {PROTO_ROOT}')
+    stdout, stderr, retcode = run_command(f'"{sys.executable}" -m neobuilder6.cli.neobuilder -b {BUILD_ROOT} {package_name} {PROTO_ROOT}')
     log.info(f'{stdout=}')
     log.info(f'{stderr=}')
     log.info(f'{retcode=}')
