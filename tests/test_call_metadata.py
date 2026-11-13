@@ -14,7 +14,6 @@ import logging
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
-PORT = 50071
 
 
 class CallMetadataTest(unittest.TestCase):
@@ -35,7 +34,7 @@ class CallMetadataTest(unittest.TestCase):
 
         cls.server = grpc.server(futures.ThreadPoolExecutor(max_workers=4))
         UnaryServiceInterface.__servicer_cls__(EchoMetadata()).add_to_server(cls.server)
-        cls.server.add_insecure_port(f'[::]:{PORT}')
+        cls.port = cls.server.add_insecure_port('[::]:0')  # Any free port
         cls.server.start()
 
     @classmethod
@@ -43,10 +42,10 @@ class CallMetadataTest(unittest.TestCase):
         if cls.server:
             cls.server.stop(0)
 
-    @staticmethod
-    def _client(**kwargs):
+    @classmethod
+    def _client(cls, **kwargs):
         from unittesting.unary.unaryservice_grpc_sender import UnaryService
-        return UnaryService(f'localhost:{PORT}', **kwargs)
+        return UnaryService(f'localhost:{cls.port}', **kwargs)
 
     @staticmethod
     def _echo(client, *keys):

@@ -89,10 +89,13 @@ class UnaryServiceServer(object):
         unaryservice_pb2_grpc.add_UnaryServiceServicer_to_server(self.servicer_implementation,
                                                                  self.grpc_server)
 
-    def start(self, port: str = '[::]:50051'):
-        self.grpc_server.add_insecure_port(port)
-        log.info(f'Starting UnaryServiceServer on port {port}...')
+    def start(self, port: str = '[::]:0') -> int:
+        """Starts the server and returns the port it's listening on (port 0,
+        the default, means any free port)."""
+        bound_port = self.grpc_server.add_insecure_port(port)
+        log.info(f'Starting UnaryServiceServer on port {bound_port}...')
         self.grpc_server.start()
+        return bound_port
 
     def stop(self):
         self.grpc_server.stop(0)
