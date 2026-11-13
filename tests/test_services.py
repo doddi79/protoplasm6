@@ -25,11 +25,10 @@ class ServiceTest(unittest.TestCase):
         sys.path.append(BUILD_ROOT)
 
     def test_raw_server_and_raw_client(self):
-        port = '50042'
         log.info(f'Beginning...')
         from tests.servicetestutils.raw_server import UnaryServiceServer
         server = UnaryServiceServer()
-        server.start(f'[::]:{port}')
+        port = server.start('[::]:0')
 
         from tests.servicetestutils import raw_client
         self.assertEqual(server.servicer_implementation.calls['WithNoData'], 0)
@@ -87,11 +86,10 @@ class ServiceTest(unittest.TestCase):
         server.stop()
 
     def test_raw_server_and_protoplasm_client(self):
-        port = '50043'
         log.info(f'Beginning...')
         from tests.servicetestutils.raw_server import UnaryServiceServer
         server = UnaryServiceServer()
-        server.start(f'[::]:{port}')
+        port = server.start('[::]:0')
 
         from unittesting.unary.unaryservice_grpc_sender import UnaryService
         client = UnaryService(f'localhost:{port}')
@@ -144,11 +142,10 @@ class ServiceTest(unittest.TestCase):
         server.stop()
 
     def test_protoplasm_server_and_raw_client(self):
-        port = '50041'
         log.info(f'Beginning...')
         from tests.servicetestutils.plasm_server import UnaryProtoplasmServer
         server = UnaryProtoplasmServer()
-        server.start(f'[::]:{port}')
+        port = server.start('[::]:0')
 
         from tests.servicetestutils import raw_client
         self.assertEqual(server.servicer_implementation.calls['WithNoData'], 0)
@@ -206,11 +203,10 @@ class ServiceTest(unittest.TestCase):
         server.stop()
 
     def test_protoplasm_server_and_protoplasm_client(self):
-        port = '50044'
         log.info(f'Beginning...')
         from tests.servicetestutils.plasm_server import UnaryProtoplasmServer
         server = UnaryProtoplasmServer()
-        server.start(f'[::]:{port}')
+        port = server.start('[::]:0')
 
         from unittesting.unary.unaryservice_grpc_sender import UnaryService
         client = UnaryService(f'localhost:{port}')
