@@ -40,6 +40,8 @@ def _dict_value_to_field_value(field: dataclasses.Field, v: Any, dataclass_type:
     is_list = field.metadata.get('is_list', False)
     is_map = field.metadata.get('is_map', False)
     if v is None:  # `dataclass_to_dict` turns unset messages and empty lists and maps into None
+        if field.metadata.get('is_optional', False):
+            return None  # An unset proto3 `optional` field (not its default value)
         if is_map:
             return {}
         if is_list:
