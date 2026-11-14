@@ -2,7 +2,7 @@
 
 Task-oriented reference for code that *uses* `protoplasm6` (distribution
 `protoplasm6`, import `protoplasm6`). Covers the working tree for version
-**6.1.0** (see [`protoplasm6/__init__.py`](../protoplasm6/__init__.py)).
+**6.2.0** (see [`protoplasm6/__init__.py`](../protoplasm6/__init__.py)).
 
 Protoplasm6 is the runtime half of a pair: [`neobuilder6`](https://github.com/doddi79/neobuilder6)
 generates code from `.proto` files (`*_dc.py` dataclasses, `*_api.py`
@@ -80,8 +80,14 @@ Field conventions in generated dataclasses:
 - Sub-messages, lists and maps of messages can be given as dicts, tuples or
   dataclasses when constructing; they're cast to the right dataclass in
   `__post_init__`.
-- Proto3 `optional` fields aren't nullable in the dataclass (they get scalar
-  defaults), so they're always "present" in protobuf made from a dataclass.
+- Proto3 `optional` scalar and enum fields (built with Neobuilder6 6.2+) are
+  `typing.Optional[...]` defaulting to `None`: `None` is unset, any other
+  value (`0`, `''` and `False` too) is set, through protobuf, bytes, dicts
+  and JSON alike (`to_dict()` gives `None` for unset ones). Their metadata
+  has `'is_optional': True`. Built with 6.1 or older they get scalar
+  defaults and are always "present".
+- Google's wrapper types (`google.protobuf.DoubleValue` etc.) aren't
+  supported: use proto3 `optional` instead.
 
 ### Oneof fields
 

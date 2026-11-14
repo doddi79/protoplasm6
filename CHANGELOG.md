@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.2.0] - 2026-11-14
+
+### Added
+
+- Proto3 `optional` support: dataclasses built by Neobuilder6 6.2+ give
+  `optional` scalar and enum fields `typing.Optional[...]` types and `None`
+  defaults (`'is_optional': True` in their metadata). `None` means unset and
+  any other value, the type's default included (`0`, `''`, `False`), is set,
+  so presence survives protobuf, bytes, dicts and JSON with both converters
+
+### Fixed
+
+- `castutils.get_type_from_module_import_as` crashed on single argument
+  `typing` generics like `typing.Optional[Foo]` (it passed a tuple)
+
 ## [6.1.0] - 2026-11-14
 
 ### Added

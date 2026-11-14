@@ -208,7 +208,7 @@ def _get_from_typing(type_name: str, inner_str: str, cls: Type) -> Type:
         raise ImportError(f'get_type_from_module_import_as->_get_from_typing failed to find {type_name} in typing module')
     if inner_str:
         args = tuple([get_type_from_module_import_as(a.strip(), cls) for a in inner_str.split(',')])
-        return typing_type[args]
+        return typing_type[args[0] if len(args) == 1 else args]  # Optional[X] takes one type, not a tuple
     return typing_type
 
 
@@ -230,6 +230,8 @@ def get_dc_field_obj_type(dc_field: dataclasses.Field,
         return dc_field.type.__args__[1]
     elif dc_field.metadata.get('is_list', False):
         return dc_field.type.__args__[0]
+    elif dc_field.metadata.get('is_optional', False):  # proto3 `optional`: Optional[X] -> X
+        return next(a for a in typing.get_args(dc_field.type) if a is not type(None))
     else:
         return dc_field.type
 

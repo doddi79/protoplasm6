@@ -83,6 +83,9 @@ def _samples():
         converters_dc.PresenceMessage(choice_message=rainbow_dc.SubMessage()),
         converters_dc.PresenceMessage(choice_string='c', maybe_enum=enums_dc.ExternalEnum.ONE),
         converters_dc.Everything(presence=converters_dc.PresenceMessage(choice_string='c')),
+        # proto3 `optional` fields set to their default values are set, not unset
+        converters_dc.PresenceMessage(maybe_string='', maybe_long=0, maybe_enum=enums_dc.ExternalEnum(0),
+                                      maybe_bool=False),
     ]
 
 
@@ -149,16 +152,40 @@ class ConverterParityTest(unittest.TestCase):
         self.assertTrue(p.HasField('maybe_string'))
         self.assertFalse(p.HasField('maybe_message'))
         self.assertEqual('choice_int', p.WhichOneof('choice'))
-        # NOTE: Since neobuilder6 gives `optional` scalars non-None defaults
-        # (e.g. 0 for maybe_long) they're always marked as present (the
-        # DictConverter does the same)
-        self.assertTrue(p.HasField('maybe_long'))
+        # proto3 `optional` scalars default to None (unset) in the dataclass
+        self.assertFalse(p.HasField('maybe_long'))
+        self.assertFalse(p.HasField('maybe_enum'))
+        self.assertIsNone(DIRECT.proto_to_dataclass(p).maybe_long)
 
         p = converters_pb2.PresenceMessage()
         p.maybe_message.SetInParent()
         dc = DIRECT.proto_to_dataclass(p)
         self.assertIsNotNone(dc.maybe_message)
         self.assertIsNone(DIRECT.proto_to_dataclass(converters_pb2.PresenceMessage()).maybe_message)
+
+    def test_optional_zero_values_are_present(self):
+        from sandbox.test import converters_dc, converters_pb2, enums_dc
+        dc = converters_dc.PresenceMessage(maybe_string='', maybe_long=0, maybe_enum=enums_dc.ExternalEnum(0),
+                                           maybe_bool=False)
+        for converter in (DIRECT, DICT):
+            with self.subTest(converter=converter.name):
+                p = converter.dataclass_to_proto(dc)
+                for name in ('maybe_string', 'maybe_long', 'maybe_enum', 'maybe_bool'):
+                    self.assertTrue(p.HasField(name), name)
+                self.assertEqual(dc, converter.proto_to_dataclass(p))
+                unset = converter.proto_to_dataclass(converters_pb2.PresenceMessage())
+                self.assertEqual((None, None, None, None),
+                                 (unset.maybe_string, unset.maybe_long, unset.maybe_enum, unset.maybe_bool))
+
+    def test_optional_fields_through_dicts(self):
+        from sandbox.test import converters_dc, enums_dc
+        for dc in (converters_dc.PresenceMessage(),
+                   converters_dc.PresenceMessage(maybe_long=0, maybe_enum=enums_dc.ExternalEnum.ONE, maybe_bool=False),
+                   converters_dc.PresenceMessage(maybe_string='x', maybe_long=2 ** 40)):
+            with self.subTest(dc=dc):
+                self.assertEqual(dc, converters_dc.PresenceMessage.from_dict(dc.to_dict()))
+                self.assertEqual(dc, converters_dc.PresenceMessage.from_json(dc.to_json()))
+        self.assertIsNone(converters_dc.PresenceMessage().to_dict()['maybe_enum'])
 
     def test_value_sentinels(self):
         from sandbox.test import googlestruct_dc
